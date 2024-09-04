@@ -14,11 +14,14 @@ random.seed(100)
 
 class AWSDBConnector:
 
-    def __init__(self):
+    def __init__(self, creds_file="db_creds.yaml"):
+        
+        with open(creds_file, "r") as file:
+            creds = yaml.safe_load(file)
+            self.HOST = creds["database"]["host"]
+            self.USER = creds["database"]["user"]
+            self.PASSWORD = creds["database"]["password"]
 
-        self.HOST = "pinterestdbreadonly.cq2e8zno855e.eu-west-1.rds.amazonaws.com"
-        self.USER = 'project_user'
-        self.PASSWORD = ':t%;yCY3Yjg'
         self.DATABASE = 'pinterest_data'
         self.PORT = 3306
         
@@ -30,9 +33,9 @@ class AWSDBConnector:
 new_connector = AWSDBConnector()
 
 API_URL = "https://jdneb8yyrb.execute-api.us-east-1.amazonaws.com/prod"
-user_topic_endpoint = f"{API_URL}/user-topic"
-pin_topic_endpoint = f"{API_URL}/pin-topic"
-geo_topic_endpoint = f"{API_URL}/geo-topic"
+user_topic_endpoint = f"{API_URL}/12e8a20c3827.user"
+pin_topic_endpoint = f"{API_URL}/12e8a20c3827.pin"
+geo_topic_endpoint = f"{API_URL}/12e8a20c3827.geo"
 
 def run_infinite_post_data_loop():
     while True:
@@ -65,7 +68,7 @@ def run_infinite_post_data_loop():
             print(user_result)
 
 def send_data_to_api(endpoint, data):
-    headers = {"Content-Type": "application/json"}
+    headers = {"Content-Type": "application/vnd.kafka.json.v2+json"}
     response = requests.post(endpoint, data=json.dumps(data), headers=headers)
     if response.status_code == 200:
         print(f"Data successfully sent to {endpoint}")
